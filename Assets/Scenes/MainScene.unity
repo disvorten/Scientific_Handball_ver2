@@ -239,8 +239,6 @@ MonoBehaviour:
   start: {fileID: 270801026}
   end: {fileID: 270801027}
   arrow: {fileID: 1587764489}
-  throw_surface: {fileID: 8742761384683451539, guid: 28197c0c81b21e346ab40114efa8e0ee,
-    type: 3}
 --- !u!4 &270801024
 Transform:
   m_ObjectHideFlags: 0
@@ -1117,6 +1115,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 54ecda871821de94e8f1e75b053a1384, type: 2}
+  gates: {fileID: 0}
 --- !u!4 &475930671
 Transform:
   m_ObjectHideFlags: 0
@@ -1470,9 +1469,22 @@ MonoBehaviour:
   targets: []
   targetsStanding: []
   targetsLying: []
+  endPos: {x: 0, y: 0, z: 0}
   filepath: 
   filename: EyeData
+  leftPos: {x: 0, y: 0, z: 0}
+  rightPos: {x: 0, y: 0, z: 0}
+  centerPos: {x: 0, y: 0, z: 0}
+  leftRot: {x: 0, y: 0, z: 0, w: 0}
+  rightRot: {x: 0, y: 0, z: 0, w: 0}
+  centerRot: {x: 0, y: 0, z: 0, w: 0}
   pathCreator: {fileID: 1541996667}
+  leftOpenness: 0
+  rightOpenness: 0
+  useVrDebug: 0
+  supported: 0
+  supportedModesCount: 0
+  supportedModes: 
   right_arm: {fileID: 6518990964623469895}
   left_arm: {fileID: 5357344570410731767}
 --- !u!1 &914641168

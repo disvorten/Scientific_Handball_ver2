@@ -4,9 +4,6 @@ using TMPro;
 using System.Collections;
 using System;
 using UnityEngine.XR.Interaction.Toolkit;
-using System.Linq;
-using System.Collections.Generic;
-using System.IO;
 
 public class Shooter_generator : MonoBehaviour
 {
@@ -27,26 +24,12 @@ public class Shooter_generator : MonoBehaviour
     [SerializeField] private AudioSource start;
     [SerializeField] private AudioSource end;
     [SerializeField] private GameObject arrow;
-    [SerializeField] private GameObject throw_surface;
-    [NonSerialized] public List<List<int>> all_indexes = new();
-
-    private float velocity;
-    private float delta_before_shoot = -1f;
-    private float delta_t;
-    private Vector3 direction;
-    private GameObject surface;
-    private bool is_first = true;
-    private int repeating_counts = 0;
 
     private void Start()
     {
         points_counter = new();
         points_counter.AddListener(ChangePoints);
-        //if(setup_config.config.experiment_number == 2)
-        //    stimuls_number = (int)setup_config.config.number_of_stimuls * 2;
-        //else
-        repeating_counts = (int)setup_config.config.number_of_stimuls;
-        stimuls_number = (int)(18f * repeating_counts);
+        stimuls_number = (int)setup_config.config.number_of_stimuls;
         ChangeTextOfStimuls(stimuls_number);
         StartCoroutine(StartExperiment());
     }
@@ -62,18 +45,6 @@ public class Shooter_generator : MonoBehaviour
         points.text = $"Отраженные: {_success} \nПропущенные: {_miss}";
         ChangeTextOfStimuls(stimuls_number - _miss - _success);
     }
-
-    private int[] MakePseudoRandomList(int number)
-    {
-        int[] indexes = Enumerable.Range(0, number).ToArray();
-
-        for (int i = indexes.Length - 1; i >= 1; i--)
-        {
-            int j = rand.Next(i + 1);
-            (indexes[i], indexes[j]) = (indexes[j], indexes[i]);
-        }
-        return indexes;
-    }
     private IEnumerator StartExperiment()
     {
         arrow.SetActive(true);
@@ -86,218 +57,155 @@ public class Shooter_generator : MonoBehaviour
         arrow.SetActive(false);
         start_text.gameObject.SetActive(false);
         start.Play();
-        float max_delta = 0f;
-        if(setup_config.config.experiment_number == 1 || setup_config.config.experiment_number == 2)
+        for (int i = 0; i < stimuls_number; i++)
         {
-            float y;
-            if (setup_config.config.throw_area_for_experiments.Count == 2)
+            Vector3 start_point = GenerateStartPointWithDistribution();
+            Vector3 start_point_in_global = new Vector3(start_point.z * (float)Math.Sin(Math.PI * start_point.x / 180), start_point.y, start_point.z * (float)Math.Cos(Math.PI * start_point.x / 180));
+            float velocity = GenerateValueWithRandom(setup_config.config.stimuls_velocity[0], setup_config.config.stimuls_velocity[1]);
+            velocity *= 1f + (setup_config.config.value_of_velocity_increase - 1f) * i / stimuls_number;
+            bool is_false_stimuls;
+            if (setup_config.config.is_false_stimuls_exists)
             {
-                y = Camera.main.transform.position.y;
+                System.Random random1 = new();
+                if((float)random1.NextDouble() < setup_config.config.false_stimuls_percentage/100f)
+                    is_false_stimuls = true;
+                else
+                    is_false_stimuls = false;
+                //Debug.Log(setup_config.config.false_stimuls_percentage / 100f);
             }
-            else y = setup_config.config.throw_area_for_experiments[2];
-            surface = Instantiate(throw_surface, new Vector3(0, y, setup_config.config.throw_area_for_experiments[0]), Quaternion.identity);
-            surface.transform.localScale = new Vector3(1, 1, 0.1f) * setup_config.config.throw_area_for_experiments[0];
-            if (setup_config.config.delta_before_shoot[0] == 0)
-            {
-                surface.SetActive(false);
-            }
+            else is_false_stimuls = false;
+            float delta_before_shoot = GenerateValueWithRandom(setup_config.config.delta_before_shoot[0], setup_config.config.delta_before_shoot[1]);
+            float delta_t = GenerateValueWithRandom(setup_config.config.delta_t[0], setup_config.config.delta_t[1]);
+            //Debug.Log(delta_before_shoot);
+            //Debug.Log(delta_t);
+            //Debug.Log(start_point_in_global);
+            //Debug.Log(velocity);
+            bool is_reflection;
+            System.Random random = new();
+            if ((float)random.NextDouble() < setup_config.config.reflection_percentage / 100f)
+                is_reflection = true;
+            else
+                is_reflection = false;
+            var end_point = GenerateEndPointWithDistribution(velocity, start_point_in_global, is_reflection);
+            //Debug.Log(end_point);
+            Vector3 direction = end_point - start_point_in_global;
+            var new_shooter = Instantiate(shooter, start_point_in_global, Quaternion.identity);
+
+            SuperBallSpawnAnimator ballSpawnAnim = new_shooter.GetComponentInChildren<SuperBallSpawnAnimator>();
+            ballSpawnAnim.animTime = delta_before_shoot;
+            new_shooter.transform.GetChild(0).localScale = new_shooter.transform.localScale * setup_config.config.diameter_of_stimul;
+            ballSpawnAnim.Init();
+
+
+            new_shooter.GetComponent<Shooter_controller>().is_false_stimul = is_false_stimuls;
+            new_shooter.GetComponent<Shooter_controller>().velocity = velocity;
+            new_shooter.GetComponent<Shooter_controller>().delta_before_shoot = delta_before_shoot;
+            new_shooter.GetComponent<Shooter_controller>().direction = direction;
+            new_shooter.GetComponent<Shooter_controller>().mass_of_stimul = setup_config.config.mass_of_stimul;
+            new_shooter.GetComponent<Shooter_controller>().use_gravity = setup_config.config.use_gravity;
+            new_shooter.GetComponent<Shooter_controller>().diameter_of_stimul = setup_config.config.diameter_of_stimul;
+            new_shooter.GetComponent<StimulDataWriter>().config_path = setup_config.full_path;
+            new_shooter.GetComponent<StimulDataWriter>().data_path = creator.data_path;
+            new_shooter.GetComponent<StimulDataWriter>().stimul_number = i;
+            yield return new WaitForSeconds(delta_t);
         }
-        if (setup_config.config.experiment_number == 2)
-        {
-            //for (int i = 0; i < stimuls_number; i+=2)
-            //{
-            //    //surface.SetActive(true);
-            //    var new_shooter = SetupExperiment(i, setup_config.config.experiment_number);
-            //    new_shooter.GetComponent<Shooter_controller>().direction = direction;
-            //    new_shooter.SetActive(false);
-            //    if (delta_before_shoot > max_delta) max_delta = delta_before_shoot;
-            //    var first_delta = delta_before_shoot;
-            //    is_first = false;
-            //    var new_shooter2 = SetupExperiment(i, setup_config.config.experiment_number);
-            //    new_shooter2.GetComponent<Shooter_controller>().direction = direction;
-            //    new_shooter2.SetActive(false);
-            //    yield return new WaitForSeconds(delta_t);
-            //    surface.SetActive(false);
-            //    new_shooter.SetActive(true);
-            //    new_shooter2.SetActive(true);
-            //    new_shooter.GetComponent<Shooter_controller>().is_false_stimul = is_false_stimuls;
-            //    new_shooter.GetComponent<Shooter_controller>().velocity = velocity;
-            //    new_shooter.GetComponent<Shooter_controller>().delta_before_shoot = first_delta;
-            //    new_shooter.GetComponent<Shooter_controller>().mass_of_stimul = 0.44f;
-            //    new_shooter.GetComponent<Shooter_controller>().use_gravity = setup_config.config.use_gravity;
-            //    new_shooter.GetComponent<Shooter_controller>().diameter_of_stimul = setup_config.config.diameter_of_stimul;
-            //    new_shooter2.GetComponent<Shooter_controller>().mass_of_stimul = 0.44f;
-            //    new_shooter2.GetComponent<Shooter_controller>().use_gravity = setup_config.config.use_gravity;
-            //    new_shooter2.GetComponent<Shooter_controller>().diameter_of_stimul = setup_config.config.diameter_of_stimul;
-            //    if (setup_config.config.experiment_number == 2)
-            //    {
-            //        var color_string = setup_config.config.stimuls_colors[UnityEngine.Random.Range(0, setup_config.config.stimuls_colors.Count)];
-            //        if (color_string == "green")
-            //        {
-            //            new_shooter.GetComponent<Shooter_controller>().color = Color.green;
-
-            //        }
-            //        if (color_string == "blue")
-            //        {
-            //            new_shooter.GetComponent<Shooter_controller>().color = Color.blue;
-
-            //        }
-            //        color_string = setup_config.config.stimuls_colors[UnityEngine.Random.Range(0, setup_config.config.stimuls_colors.Count)];
-            //        if (color_string == "green")
-            //        {
-            //            new_shooter2.GetComponent<Shooter_controller>().color = Color.green;
-
-            //        }
-            //        if (color_string == "blue")
-            //        {
-            //            new_shooter2.GetComponent<Shooter_controller>().color = Color.blue;
-
-            //        }
-            //    }
-            //    new_shooter.GetComponent<StimulDataWriter>().config_path = setup_config.full_path;
-            //    new_shooter.GetComponent<StimulDataWriter>().data_path = creator.data_path;
-            //    new_shooter.GetComponent<StimulDataWriter>().stimul_number = i;
-            //    new_shooter2.GetComponent<StimulDataWriter>().config_path = setup_config.full_path;
-            //    new_shooter2.GetComponent<StimulDataWriter>().data_path = creator.data_path;
-            //    new_shooter2.GetComponent<Shooter_controller>().is_false_stimul = is_false_stimuls;
-            //    new_shooter2.GetComponent<Shooter_controller>().velocity = velocity;
-            //    new_shooter2.GetComponent<Shooter_controller>().delta_before_shoot = delta_before_shoot;
-            //    new_shooter2.GetComponent<StimulDataWriter>().stimul_number = i+1;
-            //    if (delta_before_shoot > max_delta) max_delta = delta_before_shoot;
-            //    is_first = true;
-            //    yield return new WaitForSeconds(max_delta);
-
-            //}
-        }
-        else
-        {
-            //int [] experiment_indexes = MakePseudoRandomList((int)setup_config.config.number_of_stimuls);
-            for (int j = 0; j < repeating_counts; j++)
-            {
-                var experiment_indexes = MakePseudoRandomList(stimuls_number / repeating_counts);
-                foreach(int el in experiment_indexes) Debug.Log(el);
-                for (int i = 0; i < stimuls_number / repeating_counts; i++)
-                {
-                    //surface.SetActive(true);
-                    var new_shooter = SetupExperiment(experiment_indexes[i], setup_config.config.experiment_number);
-                    //SuperBallSpawnAnimator ballSpawnAnim = new_shooter.GetComponentInChildren<SuperBallSpawnAnimator>();
-                    //ballSpawnAnim.animTime = delta_before_shoot;
-                    //new_shooter.transform.GetChild(0).localScale = new_shooter.transform.localScale * setup_config.config.diameter_of_stimul;
-                    //ballSpawnAnim.Init();
-                    new_shooter.SetActive(false);
-                    yield return new WaitForSeconds(delta_t);
-                    surface.SetActive(false);
-                    new_shooter.SetActive(true);
-                    new_shooter.GetComponent<Shooter_controller>().velocity = velocity;
-                    new_shooter.GetComponent<Shooter_controller>().delta_before_shoot = delta_before_shoot;
-                    new_shooter.GetComponent<Shooter_controller>().direction = direction;
-                    new_shooter.GetComponent<Shooter_controller>().mass_of_stimul = 0.44f;
-                    new_shooter.GetComponent<Shooter_controller>().diameter_of_stimul = 17f;
-                    //new_shooter.GetComponent<Shooter_controller>().surface = surface;
-                    new_shooter.GetComponent<StimulDataWriter>().config_path = setup_config.full_path;
-                    new_shooter.GetComponent<StimulDataWriter>().data_path = creator.data_path;
-                    new_shooter.GetComponent<StimulDataWriter>().stimul_number = i * (j+1);
-                    yield return new WaitForSeconds(delta_before_shoot);
-                    //while(new_shooter.GetComponent<Shooter_controller>().is_catched == false || new_shooter != null)
-                    //{
-                    //    continue;
-                    //}
-                }
-            }
-        }
-        yield return new WaitForSeconds(delta_t);
         end.Play();
-        statistic.transform.rotation = Quaternion.identity;
-        statistic.transform.position = new Vector3(0, cam.transform.position.y, 4);
+        statistic.transform.SetPositionAndRotation(new Vector3(0, cam.transform.position.y, 4), Quaternion.identity);
         start_text.text = $"Процент пойманых мячей: {(float)_success/stimuls_number * 100f} %";
         start_text.gameObject.SetActive(true);
-        //GetComponent<ResultToExcelWriter>().Init(creator.data_path, all_indexes);
-        using(StreamWriter sw = new StreamWriter(creator.data_path + "/Indexes.csv"))
+    }
+    private Vector3 GenerateEndPointWithDistribution(float velocity, Vector3 start_point, bool is_reflection)
+    {
+        var target_area = setup_config.config.target_area;
+        float x = (float)(0 + target_area[0] / 3.5 * GenerateStdNormal());
+        if(x > 0)
         {
-            sw.WriteLine("C;R;H");
-            foreach(var index in all_indexes)
-            {
-                sw.WriteLine($"{index[0]};{index[1]};{index[2]}");
-            }
+            x = target_area[0] - x;
         }
+        else x = - target_area[0] - x;
+        float y = (float)((target_area[2] - target_area[1])/2 + (target_area[2] - target_area[1]) / 7 * GenerateStdNormal());
+        if (y > (target_area[2] - target_area[1])/2)
+        {
+            y = target_area[2] - y + (target_area[2] - target_area[1]) / 2;
+        }
+        //else y = (target_area[2] - target_area[1]) / 2 - (y - target_area[1]);
+        Vector3 end_pont = new Vector3(x, y, -target_area[3]);
+        Vector3 direction = end_pont - start_point;
+        if (is_reflection)
+        {
+            float temp = 1 / (end_pont.y / start_point.y + 1);
+            direction = new Vector3(direction.x * temp, -start_point.y, direction.z * temp);
+            end_pont = start_point + direction;
+        }
+        Debug.Log("end point: " + end_pont);
+        Debug.Log("start point: " + start_point);
+        Debug.Log("Direction: " + direction);
+        //direction = end_pont - start_point;
+        
+        if (setup_config.config.use_gravity)
+        {
+            velocity /= 3.6f;
+            velocity *= 1.22f;
+            float C = 9.81f / (2 * velocity * velocity);
+            float delta = QuadraticEquation(C, 2 * C * (end_pont.y - start_point.y) - 1, C * direction.magnitude * direction.magnitude);
+            end_pont.y += delta;
+        }
+        Debug.Log("fixed end point: " + end_pont);
+        return end_pont;
+    }
+    private Vector3 GenerateStartPointWithDistribution()
+    {
+        var throw_area = setup_config.config.throw_area;
+        var throw_area_depth = setup_config.config.throw_area_depth;
+        
+        float angle =
+                     (float)(0 + throw_area[0] / 3.5 * GenerateStdNormal());
+        float height =
+                     (float)((throw_area[2] - throw_area[1])/2 + (throw_area[2] - throw_area[1]) / 7 * GenerateStdNormal() + throw_area[1]);
+        float depth = GenerateValueWithRandom(throw_area_depth[0], throw_area_depth[1]);
+        return new Vector3(angle, height, depth);
     }
 
-    private IEnumerator WaitForCatch()
+    private float GenerateValueWithRandom(float a, float b)
     {
-        yield return new WaitForSeconds(delta_before_shoot * 100f);
+        return (float)(rand.NextDouble() * (b - a) + a);
     }
-    private GameObject SetupExperiment(int exp_index, int experiment_number)
-    {
-        Vector3 start_point_in_global = new();
-        Vector3 end_point = new();
-        List<int> temp = new();
-        var sign = 0;
-        if (experiment_number == 1)
-        {
-            if(exp_index % 2 == 0)
-                sign = 1;
-            else
-                sign = -1;
-            start_point_in_global = surface.transform.position + sign * new Vector3(setup_config.config.throw_area_for_experiments[1], 0,0);
-        }
-        //Debug.Log("INDEX: " + exp_index);
-        temp.Add(sign * (-1));
-        var new_exp_index = exp_index / 2;
-        //if (experiment_number == 2)
-        //{ 
-        //    if(is_first)
-        //        start_point_in_global = surface.transform.position + new Vector3(setup_config.config.throw_area_for_experiments[1], 0, 0);
-        //    else
-        //        start_point_in_global = surface.transform.position - new Vector3(setup_config.config.throw_area_for_experiments[1], 0, 0);
-        //}
 
-        System.Random random = new();
-        delta_before_shoot = setup_config.config.delta_before_shoot[0];
-        //Debug.Log("NEW_INDEX: " + new_exp_index);
-        delta_t = setup_config.config.delta_t[0];
-        float R = 0f;
-        float H = 0f;
-        if (new_exp_index % 3 == 0)
+    private double GenerateStdNormal()
+    {
+        double u1 = 1.0 - rand.NextDouble();
+        double u2 = 1.0 - rand.NextDouble();
+        double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+                     Math.Sin(2.0 * Math.PI * u2);
+        return randStdNormal;
+    }
+
+    private float QuadraticEquation(float a, float b, float c)
+    {
+        var D = Math.Pow(b, 2) - 4 * a * c;
+        Debug.Log("D: " + D);
+        if (D > 0 || D == 0)
         {
-            R = setup_config.config.target_area_R[0];
-            temp.Add(1);
+            var x1 = (-b + Math.Sqrt(D)) / (2 * a);
+            var x2 = (-b - Math.Sqrt(D)) / (2 * a);
+            Debug.Log("x_1: " + x1);
+            Debug.Log("x_2: " + x2);
+            //if (x1 > x2 && x2 > 0)
+            //    return (float)x2;
+            //if (x2 > x1 && x1 > 0)
+            //    return (float)x1;
+            //if (x1 > x2 && x2 < 0)
+            //    return (float)x1;
+            //return (float)x2;
+            return (float)x2;
+
         }
-        if (new_exp_index % 3 == 1)
-        {
-            R = setup_config.config.target_area_R[1];
-            temp.Add(-1);
-        }
-        if (new_exp_index % 3 == 2)
-        {
-            R = setup_config.config.target_area_R[2];
-            temp.Add(0);
-        }
-        new_exp_index = new_exp_index / 3;
-        if (new_exp_index % 3 == 0)
-        {
-            H = setup_config.config.target_area_H[0];
-            temp.Add(1);
-        }
-        if (new_exp_index % 3 == 1)
-        {
-            H = setup_config.config.target_area_H[1];
-            temp.Add(-1);
-        }
-        if (new_exp_index % 3 == 2)
-        {
-            H = setup_config.config.target_area_H[2];
-            temp.Add(0);
-        }
-        all_indexes.Add(temp);
-        float center_of_human = cam.gameObject.transform.position.y / 2;
-        if (sign == 1)
-            end_point = new Vector3(H, R, 0f);
+
+
         else
-            end_point = new Vector3(-H, R, 0f);
-        //Debug.Log("END point: " + end_point);
-        direction = end_point - start_point_in_global;
-        velocity = direction.magnitude / (setup_config.config.stimuls_time_of_flight[0] / 1000f);
-        return Instantiate(shooter, start_point_in_global, Quaternion.identity);
-    }
+        {
+            return 0f;
+        }
 
+    }
 }
