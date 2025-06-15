@@ -215,6 +215,7 @@ public class Shooter_generator : MonoBehaviour
         {
             yield return new WaitForSeconds(0.1f);
         }
+        yield return new WaitForSeconds(0.5f);
         //yield return new WaitForSeconds(delta_t);
         end.Play();
         statistic.transform.rotation = Quaternion.identity;
