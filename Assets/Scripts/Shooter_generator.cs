@@ -172,6 +172,7 @@ public class Shooter_generator : MonoBehaviour
         else
         {
             //int [] experiment_indexes = MakePseudoRandomList((int)setup_config.config.number_of_stimuls);
+            //Debug.Log("repeating_counts = " + repeating_counts);
             for (int j = 0; j < repeating_counts; j++)
             {
                 var experiment_indexes = MakePseudoRandomList(stimuls_number / repeating_counts);
@@ -196,7 +197,10 @@ public class Shooter_generator : MonoBehaviour
                     //new_shooter.GetComponent<Shooter_controller>().surface = surface;
                     new_shooter.GetComponent<StimulDataWriter>().config_path = setup_config.full_path;
                     new_shooter.GetComponent<StimulDataWriter>().data_path = creator.data_path;
-                    new_shooter.GetComponent<StimulDataWriter>().stimul_number = i * (j+1);
+                    //Debug.Log("J = " + j);
+                    //Debug.Log(i + j * repeating_counts);
+                    //Debug.Log("i = " + i);
+                    new_shooter.GetComponent<StimulDataWriter>().stimul_number = i + j * 18;
                     yield return new WaitForSeconds(delta_before_shoot);
                     //while(new_shooter.GetComponent<Shooter_controller>().is_catched == false || new_shooter != null)
                     //{

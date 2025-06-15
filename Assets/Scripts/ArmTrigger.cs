@@ -9,7 +9,7 @@ public class ArmTrigger : MonoBehaviour
     [SerializeField] private AudioSource wrong;
     [SerializeField] private bool right;
 
-    private void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision other)
     {
         if(other.gameObject.CompareTag("Ball"))
         {
@@ -32,7 +32,7 @@ public class ArmTrigger : MonoBehaviour
                 success.Play();
                 generator.points_counter.Invoke(0, 1);
             }
-            other.GetComponent<Rigidbody>().useGravity = true;
+            other.gameObject.GetComponent<Rigidbody>().useGravity = true;
             StartCoroutine(DelayedDestroy(other.transform.parent.gameObject));
         }
     }
