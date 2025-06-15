@@ -9,9 +9,7 @@ public class SetupStartScene : MonoBehaviour
 {
     [SerializeField] private TMP_Dropdown difficulty;
     [SerializeField] private Button start_button;
-    [SerializeField] private Button custom_setup_button;
     [SerializeField] private TMP_InputField name_input;
-    [SerializeField] private Toggle write_data;
 
     private void Start()
     {
@@ -30,12 +28,8 @@ public class SetupStartScene : MonoBehaviour
         difficulty.value = i;
         name_input.text = PlayerPrefs.GetString("Name", "Èìÿ");
         start_button.onClick.AddListener(() => OpenScene());
-        custom_setup_button.onClick.AddListener(() => CustomSetup());
         name_input.onValueChanged.AddListener(ChangeName);
-        if (PlayerPrefs.GetInt("Is_write_data", 1) == 1)
-            write_data.isOn = true;
-        else
-            write_data.isOn = false;
+
     }
     private void OpenScene()
     {
@@ -47,14 +41,11 @@ public class SetupStartScene : MonoBehaviour
         //    PlayerPrefs.SetInt("Is_write_data", 0);
         SceneManager.LoadScene("MainScene");
     }
-    private void CustomSetup()
-    {
-        SceneManager.LoadScene("CustomSetup");
-    }
 
     private void ChangeName(string name)
     {
         PlayerPrefs.SetString("Name", name_input.text);
+        Debug.Log(name_input.text);
         //Debug.Log(PlayerPrefs.GetString("Name", "Èìÿ"));
     }
 }

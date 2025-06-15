@@ -102,6 +102,7 @@ public class Shooter_generator : MonoBehaviour
                 surface.SetActive(false);
             }
         }
+        GameObject new_shooter = null;
         if (setup_config.config.experiment_number == 2)
         {
             //for (int i = 0; i < stimuls_number; i+=2)
@@ -180,7 +181,7 @@ public class Shooter_generator : MonoBehaviour
                 for (int i = 0; i < stimuls_number / repeating_counts; i++)
                 {
                     //surface.SetActive(true);
-                    var new_shooter = SetupExperiment(experiment_indexes[i], setup_config.config.experiment_number);
+                    new_shooter = SetupExperiment(experiment_indexes[i], setup_config.config.experiment_number);
                     //SuperBallSpawnAnimator ballSpawnAnim = new_shooter.GetComponentInChildren<SuperBallSpawnAnimator>();
                     //ballSpawnAnim.animTime = delta_before_shoot;
                     //new_shooter.transform.GetChild(0).localScale = new_shooter.transform.localScale * setup_config.config.diameter_of_stimul;
@@ -209,7 +210,12 @@ public class Shooter_generator : MonoBehaviour
                 }
             }
         }
-        yield return new WaitForSeconds(delta_t);
+        //Debug.Log(new_shooter);
+        while(new_shooter != null)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        //yield return new WaitForSeconds(delta_t);
         end.Play();
         statistic.transform.rotation = Quaternion.identity;
         statistic.transform.position = new Vector3(0, cam.transform.position.y, 4);
