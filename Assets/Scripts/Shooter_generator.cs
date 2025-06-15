@@ -37,6 +37,7 @@ public class Shooter_generator : MonoBehaviour
     private GameObject surface;
     private bool is_first = true;
     private int repeating_counts = 0;
+    private string index_path;
 
     private void Start()
     {
@@ -76,6 +77,7 @@ public class Shooter_generator : MonoBehaviour
     }
     private IEnumerator StartExperiment()
     {
+        index_path = creator.data_path + "/Indexes.csv";
         arrow.SetActive(true);
         for (int i = 0;i < 5; i++)
         {
@@ -103,6 +105,10 @@ public class Shooter_generator : MonoBehaviour
             }
         }
         GameObject new_shooter = null;
+        using (StreamWriter sw = File.AppendText(index_path))
+        {
+            sw.WriteLine("C;R;H");
+        }
         if (setup_config.config.experiment_number == 2)
         {
             //for (int i = 0; i < stimuls_number; i+=2)
@@ -223,14 +229,6 @@ public class Shooter_generator : MonoBehaviour
         start_text.text = $"Процент пойманых мячей: {(float)_success/stimuls_number * 100f} %";
         start_text.gameObject.SetActive(true);
         //GetComponent<ResultToExcelWriter>().Init(creator.data_path, all_indexes);
-        using(StreamWriter sw = new StreamWriter(creator.data_path + "/Indexes.csv"))
-        {
-            sw.WriteLine("C;R;H");
-            foreach(var index in all_indexes)
-            {
-                sw.WriteLine($"{index[0]};{index[1]};{index[2]}");
-            }
-        }
     }
 
     private IEnumerator WaitForCatch()
@@ -300,6 +298,10 @@ public class Shooter_generator : MonoBehaviour
             temp.Add(0);
         }
         all_indexes.Add(temp);
+        using (StreamWriter sw = File.AppendText(index_path))
+        {
+            sw.WriteLine($"{temp[0]};{temp[1]};{temp[2]}");
+        }
         float center_of_human = cam.gameObject.transform.position.y / 2;
         if (sign == 1)
             end_point = new Vector3(H, R, 0f);

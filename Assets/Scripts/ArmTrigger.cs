@@ -36,7 +36,6 @@ public class ArmTrigger : MonoBehaviour
             StartCoroutine(DelayedDestroy(other.transform.parent.gameObject));
         }
     }
-
     private IEnumerator DelayedDestroy(GameObject obj)
     {
         yield return new WaitForSeconds(1f);
