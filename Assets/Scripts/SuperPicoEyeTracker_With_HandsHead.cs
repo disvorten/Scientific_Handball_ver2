@@ -9,7 +9,6 @@ public class SuperPicoEyeTracker_With_HandsHead : MonoBehaviour
 {
     [SerializeField] bool initOnStart = false, isOn = false, writeHeadPos = true, writeEuler = true, writeHit = false;
     [SerializeField] GameObject head = null, origin = null;
-    [SerializeField] LineRenderer ray;
     [SerializeField] public List<GameObject> targets, targetsStanding, targetsLying;
     private Vector3 endPos = default;
 
@@ -19,12 +18,9 @@ public class SuperPicoEyeTracker_With_HandsHead : MonoBehaviour
     public DataPathCreator pathCreator;
     private EyeTrackingStartInfo startInfo;
     private EyeTrackingStopInfo stopInfo;
-    // private EyePupilInfo eyePupilPosition;
     private EyeTrackingDataGetInfo getInfo;
     private EyeTrackingData data;
-    //private Posef leftEyePose, rightEyePose;
-    //private long timestamp;
-    private float leftOpenness = default, rightOpenness = default; // leftPupDiameter = default, rightPupDiameter = default, leftPupPos, rightPupPos;
+    private float leftOpenness = default, rightOpenness = default;
     private StreamWriter writer = null;
     private bool useVrDebug = false;
 
@@ -68,32 +64,12 @@ public class SuperPicoEyeTracker_With_HandsHead : MonoBehaviour
                 writerRA.WriteLine("Timestamp;Position.x;Position.y;Position.z;Rotation.x;Rotation.y;Rotation.z;Rotation.w");
             }
         }
-        ray.gameObject.SetActive(false);
+        //ray.gameObject.SetActive(false);
     }
 
     public void Init()
     {
-
-        try
-        {
-            int startSuccess = PXR_MotionTracking.StartEyeTracking(ref startInfo);
-            if (startSuccess == 0)
-            {
-                Debug.Log("start eye tracking successfull!");
-
-                PXR_MotionTracking.GetEyeTrackingSupported(ref supported, ref supportedModesCount, ref supportedModes);
-            }
-            else
-            {
-                Debug.LogWarning($"start eye tracking failed, error code - {startSuccess}");
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogException(e);
-        }
-
-
+        
         //string filename = DateTime.Now.ToString("ddMMyyyy_HHmmss_") + this.filename + ".csv";
         string filepath = pathCreator.data_path;
         string filename = this.filename + ".csv";
@@ -134,10 +110,7 @@ public class SuperPicoEyeTracker_With_HandsHead : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isOn)
-        {
-            return;
-        }
+
         if (writerHead != null)
         {
             var pos = head.transform.position;
@@ -264,41 +237,6 @@ public class SuperPicoEyeTracker_With_HandsHead : MonoBehaviour
  
     }
 
-    private void DrawDebugRay()
-    {
-        try
-        {
-            
-
-            Vector3 newEyesRot = centerRot.eulerAngles;
-            newEyesRot = new Vector3(-newEyesRot.x, -newEyesRot.y, newEyesRot.z);
-            ray.transform.eulerAngles = newEyesRot;
-
-            Vector3 newEyesPos = new Vector3(centerPos.x, centerPos.y, -centerPos.z);
-            ray.transform.position = newEyesPos;
-
-            endPos = ray.transform.TransformPoint(Vector3.forward * 35);
-            RaycastHit hitPos;
-            if (Physics.Linecast(newEyesPos, endPos, out hitPos))
-            {
-                endPos = hitPos.point;
-                ray.startColor = Color.green;
-                ray.endColor = Color.green;
-            }
-            else
-            {
-                ray.startColor = Color.blue;
-                ray.endColor = Color.blue;
-            }
-            
-            ray.SetPosition(0, newEyesPos);
-            ray.SetPosition(1, endPos);
-        }
-        catch (Exception e)
-        {
-            
-        }
-    }
 
     private void OnApplicationQuit()
     {
@@ -317,7 +255,6 @@ public class SuperPicoEyeTracker_With_HandsHead : MonoBehaviour
         isOn = false;
         
         Debug.Log("eye tracking stopped");
-        ray.gameObject.SetActive(false);
         if (writerHead != null)
         {
             writerHead.Flush();

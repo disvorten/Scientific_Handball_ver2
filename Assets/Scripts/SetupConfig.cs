@@ -6,7 +6,7 @@ using UnityEngine;
 public class SetupConfig : MonoBehaviour
 {
     public ConfigReader config;
-    [SerializeField] private GameObject gates;
+    //[SerializeField] private GameObject gates;
     public string full_path {  get; private set; }
 
     private void Awake()
@@ -42,7 +42,7 @@ public class SetupConfig : MonoBehaviour
 
         config.ReadConfig(full_path);
 
-        gates.transform.position = new Vector3(0, (config.target_area[2] - config.target_area[1]) / 2, -config.target_area[3]);
-        gates.transform.localScale = new Vector3(config.target_area[0] * 2, config.target_area[2] - config.target_area[1], gates.transform.localScale.z);
+        //gates.transform.position = new Vector3(0, (config.target_area[2] - config.target_area[1]) / 2, -config.target_area[3]);
+        //gates.transform.localScale = new Vector3(config.target_area[0] * 2, config.target_area[2] - config.target_area[1], gates.transform.localScale.z);
     }
 }

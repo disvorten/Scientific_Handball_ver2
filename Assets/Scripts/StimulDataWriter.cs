@@ -13,7 +13,6 @@ public class StimulDataWriter : MonoBehaviour
     private string stimul_path;
     void Start()
     {
-
             stimul_path = data_path + "/StimulsData";
             Directory.CreateDirectory(stimul_path);
             //Debug.Log(stimul_path);
@@ -27,7 +26,6 @@ public class StimulDataWriter : MonoBehaviour
             File.CreateText(cfg).Close();
             using (StreamWriter sw = File.AppendText(stimul_path + $"/{stimul_number}_stimul.csv"))
             {
-                //sw.WriteLine($"Point`s of stimul`s start time :{DateTime.Now:HH:mm:ss.fffff}: Delay before stimul appears :{GetComponent<Shooter_controller>().delta_before_shoot}: Velocity :{GetComponent<Shooter_controller>().velocity}:");
                 sw.WriteLine($"Timestamp;Position.x;Position.y;Position.z;Is_false_stimul;Is_catched;Point`s of stimul`s start time :{DateTime.Now:HH:mm:ss.fffff}: Delay before stimul appears :{GetComponent<Shooter_controller>().delta_before_shoot}: Velocity :{GetComponent<Shooter_controller>().velocity}:");
             }
             File.Copy(config_path, cfg, true);
