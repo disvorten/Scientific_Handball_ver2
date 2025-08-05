@@ -9,6 +9,8 @@ public class ConfigReader : ScriptableObject
 {
 
     public float number_of_stimuls { get; private set; }
+    public float diameter_of_stimul { get; private set; }
+    public float diameter_of_arm { get; private set; }
     public int experiment_number { get; private set; }
 
     public List<float> delta_before_shoot { get; private set; }
@@ -17,7 +19,7 @@ public class ConfigReader : ScriptableObject
     public List<float> throw_area_for_experiments { get; private set; }
 
     public List<float> target_area_R { get; private set; }
-    public List<float> target_area_H { get; private set; }
+    public List<float> target_area_alpha { get; private set; }
 
 
     private string delimeter = " ";
@@ -30,7 +32,7 @@ public class ConfigReader : ScriptableObject
             throw_area_for_experiments = new();
             stimuls_time_of_flight = new();
             target_area_R = new();
-            target_area_H = new();
+            target_area_alpha = new();
             delta_t = new();
             delta_before_shoot = new();
             CultureInfo culture = CultureInfo.InvariantCulture;
@@ -52,19 +54,25 @@ public class ConfigReader : ScriptableObject
                                 }
                             }
                             break;
-                        case "target_area_H":
+                        case "target_area_alpha":
                             var list3 = lines[i + 1].Split(delimeter);
                             if (list3[0] != " ")
                             {
                                 foreach (var elem in list3)
                                 {
-                                    target_area_H.Add(float.Parse(elem, culture));
+                                    target_area_alpha.Add(float.Parse(elem, culture));
 
                                 }
                             }
                             break;
                         case "number_of_stimuls":
                             number_of_stimuls = float.Parse(lines[i + 1], culture);
+                            break;
+                        case "diameter_of_stimul":
+                            diameter_of_stimul = float.Parse(lines[i + 1], culture);
+                            break;
+                        case "diameter_of_arm":
+                            diameter_of_arm = float.Parse(lines[i + 1], culture);
                             break;
                         case "experiment_number":
                             experiment_number = int.Parse(lines[i + 1], culture);

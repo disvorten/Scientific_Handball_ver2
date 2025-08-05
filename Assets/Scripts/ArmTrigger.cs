@@ -9,6 +9,12 @@ public class ArmTrigger : MonoBehaviour
     [SerializeField] private AudioSource wrong;
     [SerializeField] private bool right;
 
+
+    private void Start()
+    {
+        StartCoroutine(DelayedInstantiate());
+
+    }
     private void OnCollisionEnter(Collision other)
     {
         if(other.gameObject.CompareTag("Ball"))
@@ -40,5 +46,10 @@ public class ArmTrigger : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         Destroy(obj);
+    }
+    private IEnumerator DelayedInstantiate()
+    {
+        yield return new WaitForSeconds(0.3f);
+        transform.localScale = Vector3.one * generator.arm_sphere_diameter / 100;
     }
 }
