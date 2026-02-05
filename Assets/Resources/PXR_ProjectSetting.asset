@@ -22,6 +22,7 @@ MonoBehaviour:
   eyeTracking: 1
   eyetrackingCalibration: 1
   enableETFR: 0
+  foveationLevel: -1
   latelatching: 0
   latelatchingDebug: 0
   enableSubsampled: 0
@@ -33,14 +34,19 @@ MonoBehaviour:
   sceneCapture: 0
   sharedAnchor: 0
   spatialMesh: 0
+  secureMR: 0
   meshLod: 0
   superResolution: 0
   normalSharpening: 0
   qualitySharpening: 0
   fixedFoveatedSharpening: 0
   selfAdaptiveSharpening: 0
+  handTrackingSupportType: 0
   arFoundation: 0
   mrSafeguard: 0
   enableRecommendMSAA: 1
   recommendSubsamping: 0
   recommendMSAA: 1
+  validationFFREnabled: 0
+  validationETFREnabled: 0
+  portalInited: 1

@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainScene.unity
     guid: c850ee8c3b14cc8459e7e186857cf567
+  - enabled: 1
+    path: Assets/Scenes/CalibrationScene.unity
+    guid: 67b41d0ee2e71344d875d3e742fb4166
   m_configObjects:
     Unity.XR.PXR.Settings: {fileID: 11400000, guid: d7147a6167a33f846ab606d5b7b3f4eb,
       type: 2}

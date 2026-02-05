@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -10,8 +8,6 @@ public class PicoInputs : MonoBehaviour
     [SerializeField] private GameObject left_arm;
     private bool is_line_shown_right = false;
     private bool is_line_shown_left = false;
-    //[SerializeField] private InputActionReference Show_Hide_Line_Button_Right;
-    //[SerializeField] private InputActionReference Show_Hide_Line_Button_Left;
     SuperInputActions superInputActions;
 
     private void Awake()
@@ -21,10 +17,6 @@ public class PicoInputs : MonoBehaviour
 
     private void OnEnable()
     {
-        //Show_Hide_Line_Button_Right.action.started += ChangeLineRight;
-        //Show_Hide_Line_Button_Left.action.started += ChangeLineLeft;
-        //Show_Hide_Line_Button_Right.action.Enable();
-        //Show_Hide_Line_Button_Left.action.Enable();
         superInputActions.Newactionmap.LeftTrigger.performed += TurnOnLineLeft;
         superInputActions.Newactionmap.RightTrigger.performed += TurnOnLineRight;
         superInputActions.Newactionmap.LeftTrigger.Enable();
@@ -87,10 +79,6 @@ public class PicoInputs : MonoBehaviour
 
     private void OnDestroy()
     {
-        //Show_Hide_Line_Button_Right.action.started -= ChangeLineRight;
-        //Show_Hide_Line_Button_Left.action.started -= ChangeLineLeft;
-        //Show_Hide_Line_Button_Right.action.Disable();
-        //Show_Hide_Line_Button_Left.action.Disable();
         superInputActions.Newactionmap.LeftTrigger.performed -= TurnOnLineLeft;
         superInputActions.Newactionmap.RightTrigger.performed -= TurnOnLineRight;
         superInputActions.Newactionmap.LeftTrigger.Disable();

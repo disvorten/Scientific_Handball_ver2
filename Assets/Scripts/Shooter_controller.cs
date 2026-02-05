@@ -17,6 +17,8 @@ public class Shooter_controller : MonoBehaviour
     public bool use_gravity = false;
     public Color color;
     public GameObject surface = null;
+
+    public SetupConfig setup_config = null;
     void Start()
     {
         gameObject.transform.localScale = Vector3.one * diameter_of_stimul;
@@ -29,6 +31,13 @@ public class Shooter_controller : MonoBehaviour
         var projectile = projectiles[0];
         var ball = Instantiate(projectile, transform.position, transform.rotation, transform);
         ball.transform.localScale = Vector3.one;
+        if (setup_config)
+        {
+            if (setup_config.config.experiment_number == 2 || setup_config.config.experiment_number == 3)
+            {
+                ball.GetComponent<SphereCollider>().enabled = false;
+            }
+        }
         //if(color != null)
         //{
         //    ball.GetComponent<MeshRenderer>().materials[0].color = color;
@@ -46,13 +55,19 @@ public class Shooter_controller : MonoBehaviour
         //else
         // ball.GetComponent<Rigidbody>().useGravity = false;
         //ball.GetComponent<Rigidbody>().mass = mass_of_stimul;
-        Debug.Log("Direction: " + direction.magnitude);
         direction = direction.normalized;
-        Debug.Log("Velocity: " + velocity);
         ball.GetComponent<Rigidbody>().AddForce(direction * velocity, ForceMode.VelocityChange);
         //ball.GetComponent<Rigidbody>().AddForce(direction * velocity/3.6f/7.87f, ForceMode.VelocityChange);
         ball.GetComponent<Rigidbody>().AddTorque(new Vector3(0.7f, 0.7f, 0.7f) * velocity, ForceMode.VelocityChange);
         gameObject.GetComponent<MeshRenderer>().enabled = false;
+        if (setup_config)
+        {
+            if (setup_config.config.experiment_number == 2 || setup_config.config.experiment_number == 3)
+            {
+                yield return new WaitForSeconds(setup_config.config.stimuls_time_of_flight[0] / 2000);
+                ball.GetComponent<SphereCollider>().enabled = true;
+            }
+        }
     }
     private void OnDestroy()
     {

@@ -13,7 +13,10 @@ public class ConfigReader : ScriptableObject
     public float diameter_of_arm { get; private set; }
     public int experiment_number { get; private set; }
 
+    public string person_name = null;
+
     public List<float> delta_before_shoot { get; private set; }
+    //public List<float> delta_before_second { get; private set; }
     public List<float> delta_t { get; private set; }
     public List<float> stimuls_time_of_flight { get; private set; }
     public List<float> throw_area_for_experiments { get; private set; }
@@ -50,9 +53,11 @@ public class ConfigReader : ScriptableObject
                                 foreach (var elem in list2)
                                 {
                                     target_area_R.Add(float.Parse(elem, culture));
-
                                 }
                             }
+                            break;
+                        case "person_name":
+                            person_name = lines[i + 1];
                             break;
                         case "target_area_alpha":
                             var list3 = lines[i + 1].Split(delimeter);
@@ -61,7 +66,6 @@ public class ConfigReader : ScriptableObject
                                 foreach (var elem in list3)
                                 {
                                     target_area_alpha.Add(float.Parse(elem, culture));
-
                                 }
                             }
                             break;
@@ -84,7 +88,6 @@ public class ConfigReader : ScriptableObject
                                 foreach (var elem in list4)
                                 {
                                     delta_t.Add(float.Parse(elem, culture));
-
                                 }
                             }
                             break;
@@ -95,6 +98,13 @@ public class ConfigReader : ScriptableObject
                                 delta_before_shoot.Add(float.Parse(elem, culture));
                             }
                             break;
+                        //case "delta_before_second":
+                        //    var list7 = lines[i + 1].Split(delimeter);
+                        //    foreach (var elem in list7)
+                        //    {
+                        //        delta_before_second.Add(float.Parse(elem, culture));
+                        //    }
+                        //    break;
                         case "throw_area_for_experiments":
                             var list6 = lines[i + 1].Split(delimeter);
                             foreach (var elem in list6)
@@ -109,7 +119,6 @@ public class ConfigReader : ScriptableObject
                                 stimuls_time_of_flight.Add(float.Parse(elem, culture));
                             }
                             break;
-
                     }
                     
                 }

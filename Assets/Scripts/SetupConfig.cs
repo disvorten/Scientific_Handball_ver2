@@ -11,12 +11,20 @@ public class SetupConfig : MonoBehaviour
 
     private void Awake()
     {
+        full_path = Get_config_path();
+        config.ReadConfig(full_path);
+        //gates.transform.position = new Vector3(0, (config.target_area[2] - config.target_area[1]) / 2, -config.target_area[3]);
+        //gates.transform.localScale = new Vector3(config.target_area[0] * 2, config.target_area[2] - config.target_area[1], gates.transform.localScale.z);
+    }
+
+    public string Get_config_path()
+    {
 #if UNITY_EDITOR
         var path = $@"Assets/Configs";
 #else
         var path = $@"{Application.persistentDataPath}/Configs";
 #endif
-        full_path = "";
+        string f_path = "";
         var difficulty = PlayerPrefs.GetString("Difficulty", "Легкая");
         foreach (var file in Directory.GetFiles(path))
         {
@@ -28,21 +36,17 @@ public class SetupConfig : MonoBehaviour
                 {
                     if (lines[i].StartsWith("#"))
                     {
-                        if (lines[i].Split("#")[1] == "Name_of_difficulty" && lines[i+1] == difficulty)
+                        if (lines[i].Split("#")[1] == "Name_of_difficulty" && lines[i + 1] == difficulty)
                         {
-                            full_path = file;
+                            f_path = file;
                             break;
                         }
                     }
                 }
             }
-            if (full_path != "")
+            if (f_path != "")
                 break;
         }
-
-        config.ReadConfig(full_path);
-
-        //gates.transform.position = new Vector3(0, (config.target_area[2] - config.target_area[1]) / 2, -config.target_area[3]);
-        //gates.transform.localScale = new Vector3(config.target_area[0] * 2, config.target_area[2] - config.target_area[1], gates.transform.localScale.z);
+        return f_path;
     }
 }
